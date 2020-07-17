@@ -1,7 +1,7 @@
 // Copyright (c) 2018 Stephan Unverwerth
 // This code is licensed under MIT license (See LICENSE for details)
 
-module Std.Lang.Compiler {
+module sky.lang.compiler {
     import sky.io.*;
     import sky.io.file.*;
     import sky.lang.compiler.parser.*;
