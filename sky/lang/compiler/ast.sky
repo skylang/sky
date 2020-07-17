@@ -1,0 +1,1206 @@
+// Copyright (c) 2018 Stephan Unverwerth
+// This code is licensed under MIT license (See LICENSE for details)
+
+module sky.lang.compiler.ast {
+    import sky.collections.List;
+    import sky.lang.lexer.Token;
+    import sky.lang.lexer.Position;
+	import sky.lang.lexer.TokenType;
+    import sky.io.*;
+
+	export interface Node {
+		var start: Position;
+		var end: Position;
+
+		function getNodeAtPosition(pos: Position): Node?;
+	}
+
+	function contains(node: Node, pos: Position): bool {
+		return pos.isInside(node.start, node.end);
+	}
+
+    export interface Statement {
+        var start: Position;
+        var end: Position;
+    }
+
+    export class EmptyStatement {
+        var start: Position;
+		var end: Position;
+
+        function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export class MissingStatement {
+		var start: Position;
+		var end: Position;
+        
+        function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export interface Expression {
+        var start: Position;
+        var end: Position;
+    }
+
+    export class MissingExpression {
+		var start: Position;
+		var end: Position;
+
+        function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export interface TypeExpression {
+        var start: Position;
+        var end: Position;
+
+		function getName(): String;
+    }
+
+    export class MissingTypeExpression {
+        var start: Position;
+		var end: Position;
+
+        function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+
+		function getName(): String {
+			return "<missing type expression>";
+		}
+	}
+
+
+    export class Identifier {
+		var start: Position;
+		var end: Position;
+        var token: Token;
+
+        function init(start: Position, end: Position, t: Token) {
+			this.start = start;
+			this.end = end;
+            this.token = t;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+
+    export class QualifiedIdentifier {
+		var start: Position;
+		var end: Position;
+        var ids: List<Identifier>;
+
+        function init(start: Position, end: Position, ids: List<Identifier>) {
+			this.start = start;
+			this.end = end;
+            this.ids = ids;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class WildcardIdentifier {
+		var start: Position;
+		var end: Position;
+        var isWildcard: bool;
+        var ids: List<Identifier>;
+
+        function init(start: Position, end: Position, ids: List<Identifier>, isWildcard: bool) {
+			this.start = start;
+			this.end = end;
+            this.ids = ids;
+            this.isWildcard = isWildcard;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class ModuleDecl {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+        var name: List<Identifier>;
+        var imports: List<ImportDirective>;
+        var exports: List<ExportDirective>;
+        var classes: List<ClassDecl>;
+        var interfaces: List<InterfaceDecl>;
+        var enums: List<EnumDecl>;
+        var functions: List<FunctionDecl>;
+		var types: List<TypeAliasDecl>;
+
+        function init(
+			trivia: String,
+			start: Position,
+			end: Position,
+			name: List<Identifier>,
+			imports: List<ImportDirective>,
+			exports: List<ExportDirective>,
+			classes: List<ClassDecl>,
+			interfaces: List<InterfaceDecl>,
+			enums: List<EnumDecl>,
+			functions: List<FunctionDecl>,
+			types: List<TypeAliasDecl>
+		) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+            this.name = name;
+            this.imports = imports;
+            this.exports = exports;
+            this.classes = classes;
+            this.interfaces = interfaces;
+            this.enums = enums;
+            this.functions = functions;
+			this.types = types;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+
+			var i: int = 0;
+			while (i < this.classes.length) {
+				var n = this.classes[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+
+			i = 0;
+			while (i < this.interfaces.length) {
+				var n = this.interfaces[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+
+			i = 0;
+			while (i < this.enums.length) {
+				var n = this.enums[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+
+			i = 0;
+			while (i < this.functions.length) {
+				var n = this.functions[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+
+			i = 0;
+			while (i < this.types.length) {
+				var n = this.types[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+
+			return this;
+		}
+    }
+
+    export class ExpressionStatement {
+		var start: Position;
+		var end: Position;
+        var expression: Expression;
+
+        function init(start: Position, end: Position, expr: Expression) {
+			this.start = start;
+			this.end = end;
+            this.expression = expr;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class ReturnStatement {
+		var start: Position;
+		var end: Position;
+        var expr: Expression?;
+
+        function init(start: Position, end: Position, expr: Expression?) {
+			this.start = start;
+			this.end = end;
+            this.expr = expr;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) return null;
+			return this;
+		}
+    }
+
+    export class IfStatement {
+		var start: Position;
+		var end: Position;
+        var expression: Expression;
+        var trueBranch: Statement;
+        var falseBranch: Statement?;
+
+        function init(start: Position, end: Position, expr: Expression, trueBranch: Statement, falseBranch: Statement?) {
+			this.start = start;
+			this.end = end;
+            this.expression = expr;
+            this.trueBranch = trueBranch;
+            this.falseBranch = falseBranch;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class WhileStatement {
+		var start: Position;
+		var end: Position;
+        var expression: Expression;
+        var statement: Statement;
+
+        function init(start: Position, end: Position, expr: Expression, statement: Statement) {
+			this.start = start;
+			this.end = end;
+            this.expression = expr;
+            this.statement = statement;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class ImportDirective {
+        var start: Position;
+		var end: Position;
+        var imports: List<WildcardIdentifier>;
+
+        function init(start: Position, end: Position, imports: List<WildcardIdentifier>) {
+			this.start = start;
+			this.end = end;
+            this.imports = imports;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class ExportDirective {
+		var start: Position;
+		var end: Position;
+        var exports: List<Identifier>;
+
+        function init(start: Position, end: Position, exports: List<Identifier>) {
+			this.start = start;
+			this.end = end;
+            this.exports = exports;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+            return this;
+		}
+    }
+
+    export class FunctionDecl {
+		var trivia: String;
+        var start: Position;
+        var end: Position;
+
+		var isExported: bool;
+		var isExternal: bool;
+
+        var name: Identifier | Token;
+        var returnType: TypeExpression?;
+        var params: List<Parameter>;
+        var body: Block?;
+
+        function init(trivia: String, start: Position, end: Position, isExported: bool, isExternal: bool, name: Identifier | Token, params: List<Parameter>, returnType: TypeExpression?, body: Block?) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+			this.isExported = isExported;
+			this.isExternal = isExternal;
+            this.name = name;
+            this.params = params;
+            this.returnType = returnType;
+            this.body = body;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+
+            var body = this.body;
+            if (body is Block) {
+                var n = body.getNodeAtPosition(pos);
+                if (n is Node) {
+                    return n;
+                }
+            }
+			return this;
+		}
+
+		function getName(): String {
+			var name = this.name;
+			if (name is Token) {
+				if (name._type == TokenType.BracketOpen) {
+					return "[]";
+				}
+				else {
+					return name.value;
+				}
+			}
+			else {
+				return name.token.value;
+			}
+		}
+    }
+
+    export class Block {
+        var start: Position;
+		var end: Position;
+        var stmts: List<Statement>;
+
+        function init(start: Position, end: Position, stmts: List<Statement>) {
+			this.start = start;
+			this.end = end;
+            this.stmts = stmts;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+	export class AssignmentExpression {
+		var start: Position;
+		var end: Position;
+		var assignee: Expression;
+		var value: Expression;
+		var op: Token;
+
+		function init(start: Position, end: Position, assignee: Expression, value: Expression, op: Token) {
+			this.start = start;
+			this.end = end;
+			this.assignee = assignee;
+			this.value = value;
+			this.op = op;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class ThisExpression {
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class ArrayLiteralExpression {
+		var start: Position;
+		var end: Position;
+		var elements: List<Expression>;
+
+		function init(start: Position, end: Position, elements: List<Expression>) {
+			this.start = start;
+			this.end = end;
+			this.elements = elements;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class ObjectLiteralExpression {
+		var start: Position;
+		var end: Position;
+		var keys: List<Expression>;
+		var values: List<Expression>;
+
+		function init(start: Position, end: Position, keys: List<Expression>, values: List<Expression>) {
+			this.start = start;
+			this.end = end;
+			this.keys = keys;
+			this.values = values;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export class IntLiteralExpression {
+		var start: Position;
+		var end: Position;
+        var value: Token;
+
+        function init(start: Position, end: Position, val: Token) {
+			this.start = start;
+			this.end = end;
+            this.value = val;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class StringLiteralExpression {
+		var start: Position;
+		var end: Position;
+        var value: Token;
+
+        function init(start: Position, end: Position, val: Token) {
+			this.start = start;
+			this.end = end;
+            this.value = val;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class FloatLiteralExpression {
+		var start: Position;
+		var end: Position;
+        var value: Token;
+
+        function init(start: Position, end: Position, val: Token) {
+			this.start = start;
+			this.end = end;
+            this.value = val;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+	export class NewExpression {
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class SubscriptExpression {
+		var start: Position;
+		var end: Position;
+		var target: Expression;
+		var args: List<Expression>;
+
+		function init(start: Position, end: Position, target: Expression, args: List<Expression>) {
+			this.start = start;
+			this.end = end;
+			this.target = target;
+			this.args = args;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class BinopExpression {
+		var start: Position;
+		var end: Position;
+		var left: Expression;
+		var right: Expression;
+		var op: Token;
+
+		function init(start: Position, end: Position, left: Expression, right: Expression, op: Token) {
+			this.start = start;
+			this.end = end;
+			this.left = left;
+			this.right = right;
+			this.op = op;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class PostfixExpression {
+		var start: Position;
+		var end: Position;
+		var target: Expression;
+		var op: Token;
+
+		function init(start: Position, end: Position, target: Expression, op: Token) {
+			this.start = start;
+			this.end = end;
+			this.target = target;
+			this.op = op;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class PrefixExpression {
+		var start: Position;
+		var end: Position;
+		var target: Expression;
+		var op: Token;
+
+		function init(start: Position, end: Position, target: Expression, op: Token) {
+			this.start = start;
+			this.end = end;
+			this.target = target;
+			this.op = op;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class ScopeExpression {
+		var start: Position;
+		var end: Position;
+		var target: Expression;
+		var name: Identifier;
+
+		function init(start: Position, end: Position, target: Expression, name: Identifier) {
+			this.start = start;
+			this.end = end;
+			this.target = target;
+			this.name = name;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export class IdentifierExpression {
+		var start: Position;
+		var end: Position;
+        var name: Token;
+
+        function init(start: Position, end: Position, name: Token) {
+			this.start = start;
+			this.end = end;
+            this.name = name;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class IdentifierTypeExpression {
+        var start: Position;
+		var end: Position;
+        var name: Token;
+
+        function init(start: Position, end: Position, name: Token) {
+			this.start = start;
+			this.end = end;
+            this.name = name;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+
+		function getName(): String {
+			return this.name.value;
+		}
+    }
+
+	export class GenericTypeExpression {
+        var base: TypeExpression;
+        var typeArgs: List<TypeExpression>;
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position, base: TypeExpression, typeArgs: List<TypeExpression>) {
+            this.base = base;
+            this.typeArgs = typeArgs;
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+
+		function getName(): String {
+			var str = this.base.getName() + "<";
+            var i: int = 0;
+            var l = this.typeArgs.length;
+            while (i < l) {
+                str = str + this.typeArgs[i].getName();
+                if (i < l - 1) {
+                    str = str + ", ";
+                }
+                i++;
+            }
+            str = str + ">";
+            return str;
+		}
+	}
+
+	export class NullableTypeExpression {
+        var base: TypeExpression;
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position, base: TypeExpression) {
+            this.base = base;
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+
+		function getName(): String {
+			return this.base.getName() + "?";
+		}
+	}
+
+	export class UnionTypeExpression {
+        var base: TypeExpression;
+		var secondary: TypeExpression;
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position, base: TypeExpression, secondary: TypeExpression) {
+            this.base = base;
+			this.secondary = secondary;
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+
+		function getName(): String {
+			return this.base.getName() + " | " + this.secondary.getName();
+		}
+	}
+
+    export class ArrayTypeExpression {
+		var start: Position;
+		var end: Position;
+        var baseType: TypeExpression;
+        var length: int?;
+
+        function init(start: Position, end: Position, baseType: TypeExpression, length: int?) {
+			this.start = start;
+			this.end = end;
+            this.baseType = baseType;
+            this.length = length;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+
+		function getName(): String {
+			var l = this.length;
+			if (l is null) {
+				return this.baseType.getName() + "[]";
+			}
+			else {
+				return this.baseType.getName() + "[" + toString(l) + "]";
+			}
+		}
+    }
+
+    export class CallExpression {
+		var start: Position;
+		var end: Position;
+        var target: Expression;
+        var arguments: List<Expression>;
+
+        function init(start: Position, end: Position, target: Expression, args: List<Expression>) {
+			this.start = start;
+			this.end = end;
+            this.target = target;
+            this.arguments = args;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+	export class IsExpression {
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+	export class CastExpression {
+		var start: Position;
+		var end: Position;
+
+		function init(start: Position, end: Position) {
+			this.start = start;
+			this.end = end;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export class Parameter {
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+        var _type: TypeExpression;
+        
+        function init(start: Position, end: Position, name: Identifier, _type: TypeExpression) {
+			this.start = start;
+			this.end = end;
+            this.name = name;
+            this._type = _type;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+	export class TypeAliasDecl {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+		var name: Identifier;
+		var _type: TypeExpression;
+
+		function init(trivia: String, start: Position, end: Position, name: Identifier, _type: TypeExpression) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+			this.name = name;
+			this._type = _type;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export class ClassDecl {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+		var genericParams: List<Identifier>?;
+        var methods: List<ClassMethodDecl>;
+        var fields: List<ClassFieldDecl>;
+
+        function init(trivia: String, start: Position, end: Position, name: Identifier, genericParams: List<Identifier>?, methods: List<ClassMethodDecl>, fields: List<ClassFieldDecl>) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+            this.name = name;
+			this.genericParams = genericParams;
+            this.methods = methods;
+            this.fields = fields;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+
+			var i: int = 0;
+			while (i < this.methods.length) {
+				var n = this.methods[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+
+			i = 0;
+			while (i < this.fields.length) {
+				var n = this.fields[i].getNodeAtPosition(pos);
+				if (n is Node) {
+					return n;
+				}
+				i++;
+			}
+			return this;
+		}
+    }
+
+    export class ClassMethodDecl {
+		var start: Position;
+		var end: Position;
+        var fn: FunctionDecl;
+
+        function init(start: Position, end: Position, fn: FunctionDecl) {
+			this.start = start;
+			this.end = end;
+            this.fn = fn;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+            var n = this.fn.getNodeAtPosition(pos);
+            if (n is Node) {
+                return n;
+            }
+			return this;
+		}
+    }
+
+    export class ClassFieldDecl {
+		var start: Position;
+		var end: Position;
+        var variable: VarDecl;
+
+        function init(start: Position, end: Position, variable: VarDecl) {
+			this.start = start;
+			this.end = end;
+            this.variable = variable;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class VarDecl {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+        var _type: TypeExpression?;
+		var initializer: Expression?;
+
+        function init(trivia: String, start: Position, end: Position, name: Identifier, _type: TypeExpression?, initializer: Expression?) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+            this.name = name;
+            this._type = _type;
+			this.initializer = initializer;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class InterfaceDecl {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+        var methods: List<InterfaceMethod>;
+        var fields: List<InterfaceField>;
+
+		function init(
+			trivia: String,
+			start: Position,
+			end: Position,
+			name: Identifier,
+			methods: List<InterfaceMethod>,
+			fields: List<InterfaceField>
+		) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+			this.name = name;
+			this.methods = methods;
+			this.fields = fields;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+	export class InterfaceField {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+		var name: Identifier;
+		var _type: TypeExpression;
+
+		function init(trivia: String, start: Position, end: Position, name: Identifier, _type: TypeExpression) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+			this.name = name;
+			this._type = _type;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+	}
+
+    export class InterfaceMethod {
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+        var params: List<Parameter>;
+        var returnType: TypeExpression?;
+
+		function init(start: Position, end: Position, name: Identifier, params: List<Parameter>, returnType: TypeExpression?) {
+			this.start = start;
+			this.end = end;
+			this.name = name;
+			this.params = params;
+			this.returnType = returnType;
+		}
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class EnumDecl {
+		var trivia: String;
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+        var elements: List<EnumElement>;
+
+        function init(trivia: String, start: Position, end: Position, n: Identifier, el: List<EnumElement>) {
+			this.trivia = trivia;
+			this.start = start;
+			this.end = end;
+            this.name = n;
+            this.elements = el;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+
+    export class EnumElement {
+		var start: Position;
+		var end: Position;
+        var name: Identifier;
+        
+        function init(start: Position, end: Position, n: Identifier) {
+			this.start = start;
+			this.end = end;
+            this.name = n;
+        }
+
+		function getNodeAtPosition(pos: Position): Node? {
+			if (!contains(this, pos)) {
+                return null;
+            }
+			return this;
+		}
+    }
+}

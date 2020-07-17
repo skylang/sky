@@ -1,0 +1,151 @@
+// Copyright (c) 2018 Stephan Unverwerth
+// This code is licensed under MIT license (See LICENSE for details)
+
+module sky.net {
+    import sky.csockets;
+    import sky.cstdio.*;
+	import sky.collections.List;
+    import sky.io.*;
+
+    export class IPAddress {
+        var a: u8;
+        var b: u8;
+        var c: u8;
+        var d: u8;
+
+        function init(a: u8, b: u8, c: u8, d: u8) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+        }
+
+        function toInt(): u32 {
+            var i: u32 = this.d + this.c * 256 + this.b * 65536 + this.a * 16777216;
+            return i;
+        }
+    }
+
+    /*
+    AF_UNIX		1
+    AF_INET		2
+    AF_INET6	10
+    */
+
+    export class Socket {
+        var handle: i32;
+		var errorflag: bool;
+
+        function init(s: i32) {
+            this.handle = s;
+			this.errorflag = this.handle >= 0;
+        }
+
+        function init(ip: u32, port: u16) {
+            this.handle = csockets.socket(2, 1, 0);
+			this.errorflag = this.handle < 0;
+			if (this.errorflag) {
+				return;
+			}
+            this.bind(ip, port);
+        }
+
+        function init() {
+            this.handle = csockets.socket(2, 1, 0);
+			this.errorflag = this.handle >= 0;
+        }
+
+        function connect(ip: u32, port: u16): i32 {
+            var addr = new csockets.sockaddr_in;
+            addr.family = 2;
+            addr.addr = csockets.htonl(ip);
+            addr.port = csockets.htons(port);
+            var result = csockets.connect(this.handle, addr, 16);
+			this.errorflag = result == -1;
+			return result;
+        }
+
+		function isValid(): bool {
+			return !this.errorflag;
+		}
+
+        function readLine(): String {
+            var tmp = "X";
+            var buf = new List<u8>;
+
+            while (true) {
+				var result = csockets.recv(this.handle, tmp, 1, 0);
+				if (result <= 0) {
+					this.errorflag = true;
+					return "";
+				}
+                buf.append(tmp.data[0]);
+                if (tmp == "\n") {
+                    return new String(buf.array, buf.length);
+                }
+            }
+
+            return new String(buf.array, buf.length);
+        }
+
+        function read(num: int): String {
+            var tmp = new String(num);
+            var result = "";
+            while (result.length() < num) {
+                var numRead = csockets.recv(this.handle, tmp, num, 0);
+                if (numRead < 0) {
+					this.errorflag = true;
+                    return result;
+                }
+                if (numRead > 0) {
+                    result = result + tmp.substr(0, numRead);
+                    num = num - numRead;
+                }
+            }
+            return result;
+        }
+
+        function write(str: String) {
+            var remaining = str.length();
+            while (remaining > 0) {
+                var written = csockets.send(this.handle, str, remaining, 0);
+                if (written < 0) {
+					this.errorflag = true;
+                    return;
+                }
+                if (written > 0) {
+                    remaining = remaining - written;
+                    str = str.substr(written, remaining);
+                }
+            }
+        }
+
+        function bind(ip: u32, port: u16) {
+            var addr = new csockets.sockaddr_in;
+            addr.family = 2;
+            addr.addr = csockets.htonl(ip);
+            addr.port = csockets.htons(port);
+
+            csockets.bind(this.handle, addr, 16);
+        }
+
+        function listen() {
+            csockets.listen(this.handle, 1);
+        }
+
+        function accept(): Socket {
+            var addr = new csockets.sockaddr_in;
+            var len: u32 = 16;
+            var newsock = csockets.accept(this.handle, addr, len);
+            return new Socket(newsock);
+        }
+
+        function shutdown() {
+            csockets.shutdown(this.handle, 0);
+        }
+
+        function close() {
+            csockets.close(this.handle);
+        }
+    }
+}

@@ -1,0 +1,66 @@
+// Copyright (c) 2018 Stephan Unverwerth
+// This code is licensed under MIT license (See LICENSE for details)
+
+module sky.io {
+    import sky.cstdio.*;
+
+    export class File {
+        var handle: u32;
+        var name: String;
+
+        function init(name: String, mode: String) {
+            this.name = name;
+            this.handle = fopen(name, mode);
+        }
+
+        function good(): bool {
+            return this.handle > 0;
+        }
+
+        function write(str: String) {
+            fwrite(str, strlen(str), 1, this.handle);
+        }
+
+        function write(n: u8) {
+            fwrite(n, 1, 1, this.handle);
+        }
+
+        function write(n: u16) {
+            fwrite(n, 2, 1, this.handle);
+        }
+
+        function close() {
+            fclose(this.handle);
+        }
+
+        function isEof(): bool {
+            return feof(this.handle) != 0;
+        }
+
+        function getc(): String {
+			var ch = fgetc(this.handle);
+			if (ch < 0) {
+                return "";
+            }
+            return new String([ch as u8]);
+        }
+
+        function peek(): String {
+            var ch = fgetc(this.handle);
+            ungetc(ch, this.handle);
+			if (ch < 0) {
+                return "";
+            }
+            return new String([ch as u8]);
+        }
+
+        function readAll(): String {
+            fseek(this.handle, 0, 2);
+            var len = ftell(this.handle);
+            fseek(this.handle, 0, 0);
+            var str = new String(len);
+            fread(str, len, 1, this.handle);
+            return str;
+        }
+    }
+}

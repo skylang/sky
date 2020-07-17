@@ -1,0 +1,7 @@
+# Build directories
+release
+debug
+
+# Editors
+.vscode
+.vs

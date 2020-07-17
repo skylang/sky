@@ -1,0 +1,110 @@
+// Copyright (c) 2018 Stephan Unverwerth
+// This code is licensed under MIT license (See LICENSE for details)
+
+module sky.collections {
+
+    export class List<T> {
+        var array: T[];
+        var length: int;
+
+        function init() {
+            this.array = new T[](1);
+            this.length = 0;
+        }
+
+        function init(capacity: int) {
+            this.array = new T[](capacity);
+            this.length = 0;
+        }
+
+        function init(data: T[]) {
+            this.array = data;
+            this.length = data.length;
+        }
+
+        function append(value: T) {
+            if (this.array.length < this.length + 1) {
+                var newArray: T[] = new T[](this.array.length * 2 + 1);
+                var i = 0;
+                while (i < this.array.length) {
+                    newArray[i] = this.array[i];
+                    i++;
+                }
+                this.array = newArray;
+            }
+            
+            this.array[this.length] = value;
+            this.length = this.length + 1;
+        }
+
+        function set(index: int, value: T) {
+            this.array[index] = value;
+        }
+
+        function remove(index: int) {
+            var i: int = index;
+            var l: int = this.length - 1;
+            while (i < l) {
+                this.array[i] = this.array[i + 1];
+                i++;
+            }
+            this.length = this.length - 1;
+        }
+
+        function [](i: int): T {
+            return this.array[i];
+        }
+    }
+
+    export class Map<K, V> {
+        var keys: List<K>;
+        var values: List<V>;
+
+        function init() {
+            this.keys = new List<K>;
+            this.values = new List<V>;
+        }
+
+        function init(keys: K[], values: V[]) {
+            this.keys = new List<K>(keys);
+            this.values = new List<V>(values);
+        }
+
+        function has(key: K): bool {
+            return this.keyIndex(key) >= 0;
+        }
+
+        function keyIndex(key: K): int {
+            var i: int = 0;
+            while (i < this.keys.length) {
+                if (this.keys[i] == key) {
+                    return i;
+                }
+                i++;
+            }
+            return -1;
+        }
+
+        function set(key: K, value: V) {
+            var index = this.keyIndex(key);
+            if (index >= 0) {
+                this.values.set(index, value);
+            } else {
+                this.keys.append(key);
+                this.values.append(val);
+            }
+        }
+
+        function remove(key: K) {
+            var index = this.keyIndex(key);
+            if (index >= 0) {
+                this.keys.remove(index);
+                this.values.remove(index);
+            }
+        }
+
+        function [](key: K): V {
+            return this.values[this.keyIndex(key)];
+        }
+    }
+}

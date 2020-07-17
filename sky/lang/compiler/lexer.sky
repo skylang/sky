@@ -1,0 +1,341 @@
+// Copyright (c) 2018 Stephan Unverwerth
+// This code is licensed under MIT license (See LICENSE for details)
+
+module sky.lang.compiler.lexer {
+    import sky.io.*;
+    import sky.collections.Map;
+
+    export enum TokenType {
+        Eof,
+        Module,
+        Import,
+        Export,
+        External,
+        Class,
+        Interface,
+        Enum,
+        Function,
+        Var,
+        If,
+        Else,
+        While,
+        Return,
+        New,
+        This,
+        Is,
+        As,
+        Type,
+        Identifier,
+        StringLiteral,
+        IntLiteral,
+        FloatLiteral,
+        ParenOpen,
+        ParenClose,
+        BracketOpen,
+        BracketClose,
+        CurlyOpen,
+        CurlyClose,
+        ExclamationMark,
+        QuestionMark,
+        Period,
+        Comma,
+        Colon,
+        Semicolon,
+        Whitespace,
+        Comment,
+        Asterisk,
+        AsteriskEquals,
+        Equals,
+        EqualsEquals,
+        ExclEquals,
+        Amp,
+        AmpAmp,
+        Pipe,
+        PipePipe,
+        Slash,
+        SlashEquals,
+        Plus,
+        PlusEquals,
+        PlusPlus,
+        Minus,
+        MinusEquals,
+        MinusMinus,
+        Percent,
+        PercentEquals,
+        LessThan,
+        GreaterThan,
+        LessThanEquals,
+        GreaterThanEquals,
+        Invalid,
+        Missing
+    }
+
+    export class Position {
+        var row: int;
+        var column: int;
+
+        function init(row: int, column: int) {
+            this.row = row;
+            this.column = column;
+        }
+
+        function isInside(start: Position, end: Position): bool {
+            if (this.row < start.row) return false;
+            if (this.row > end.row) return false;
+            if (this.row == start.row) return this.column >= start.column;
+            if (this.row == end.row) return this.column <= end.column;
+            return true;
+        }
+    }
+
+    export class Token {
+        var _type: TokenType;
+        var value: String;
+        var file: File;
+        var position: Position;
+
+        function init(file: File, tt: TokenType, val: String, position: Position) {
+            this.file = file;
+            this._type = tt;
+            this.value = val;
+            this.position = position;
+        }
+    }
+
+    function isWs(ch: String): bool {
+		if (ch.length() < 1) return false;
+        return ch == " " || ch == "\t" || ch == "\r" || ch == "\n";
+    }
+
+    function isNum(ch: String): bool {
+		if (ch.length() < 1) return false;
+        return ch.data[0] > 47 && ch.data[0] < 58;
+    }
+
+    function isAl(ch: String): bool {
+		if (ch.length() < 1) return false;
+        return (ch.data[0] > 64 && ch.data[0] < 91) || (ch.data[0] > 96 && ch.data[0] < 123);
+    }
+
+    function isAlNum(ch: String): bool {
+		if (ch.length() < 1) return false;
+        return isAl(ch) || isNum(ch);
+    }
+
+    export class Lexer {
+        var str: String;
+        var ch: String;
+        var file: File;
+        var row: int;
+        var column: int;
+        var newline: bool;
+        var position: Position;
+
+        var singleChars: Map<String, TokenType>;
+        var twoChars: Map<String, TokenType>;
+        var keywords: Map<String, TokenType>;
+
+        function init(f: File) {
+            this.file = f;
+            this.ch = this.get();
+            this.str = new String();
+            this.newline = false;
+            this.row = 1;
+            this.column = 1;
+
+            this.singleChars = new Map<String, TokenType>;
+            this.singleChars.set("-", TokenType.Minus);
+            this.singleChars.set(",", TokenType.Comma);
+            this.singleChars.set(";", TokenType.Semicolon);
+            this.singleChars.set(":", TokenType.Colon);
+            this.singleChars.set("!", TokenType.ExclamationMark);
+            this.singleChars.set("?", TokenType.QuestionMark);
+            this.singleChars.set(".", TokenType.Period);
+            this.singleChars.set("(", TokenType.ParenOpen);
+            this.singleChars.set(")", TokenType.ParenClose);
+            this.singleChars.set("[", TokenType.BracketOpen);
+            this.singleChars.set("]", TokenType.BracketClose);
+            this.singleChars.set("{", TokenType.CurlyOpen);
+            this.singleChars.set("}", TokenType.CurlyClose);
+            this.singleChars.set("*", TokenType.Asterisk);
+            this.singleChars.set("/", TokenType.Slash);
+            this.singleChars.set("&", TokenType.Amp);
+            this.singleChars.set("%", TokenType.Percent);
+            this.singleChars.set("+", TokenType.Plus);
+            this.singleChars.set("<", TokenType.LessThan);
+            this.singleChars.set("=", TokenType.Equals);
+            this.singleChars.set(">", TokenType.GreaterThan);
+            this.singleChars.set("|", TokenType.Pipe);
+
+            this.twoChars = new Map<String, TokenType>;
+            this.twoChars.set("--", TokenType.MinusMinus);
+            this.twoChars.set("!=", TokenType.ExclEquals);
+            this.twoChars.set("&&", TokenType.AmpAmp);
+            this.twoChars.set("++", TokenType.PlusPlus);
+            this.twoChars.set("<=", TokenType.LessThanEquals);
+            this.twoChars.set("==", TokenType.EqualsEquals);
+            this.twoChars.set(">=", TokenType.GreaterThanEquals);
+            this.twoChars.set("||", TokenType.PipePipe);
+
+            this.twoChars.set("+=", TokenType.PlusEquals);
+            this.twoChars.set("-=", TokenType.MinusEquals);
+            this.twoChars.set("*=", TokenType.AsteriskEquals);
+            this.twoChars.set("/=", TokenType.SlashEquals);
+            this.twoChars.set("%=", TokenType.PercentEquals);
+
+            this.keywords = new Map<String, TokenType>;
+            this.keywords.set("module", TokenType.Module);
+            this.keywords.set("import", TokenType.Import);
+            this.keywords.set("export", TokenType.Export);
+            this.keywords.set("external", TokenType.External);
+            this.keywords.set("class", TokenType.Class);
+            this.keywords.set("interface", TokenType.Interface);
+            this.keywords.set("enum", TokenType.Enum);
+            this.keywords.set("function", TokenType.Function);
+            this.keywords.set("var", TokenType.Var);
+            this.keywords.set("if", TokenType.If);
+            this.keywords.set("else", TokenType.Else);
+            this.keywords.set("while", TokenType.While);
+            this.keywords.set("return", TokenType.Return);
+            this.keywords.set("new", TokenType.New);
+            this.keywords.set("this", TokenType.This);
+			this.keywords.set("is", TokenType.Is);
+			this.keywords.set("as", TokenType.As);
+            this.keywords.set("type", TokenType.Type);
+        }
+
+        function hasNext(): bool {
+            return !this.file.isEof();
+        }
+
+        function get(): String {
+            var ch = this.file.getc();
+
+            if (ch == "\n") {
+                this.row = this.row + 1;
+                this.column = 0;
+            }
+            else {
+                this.column = this.column + 1;
+            }
+
+            return ch;
+        }
+
+        function next(): Token {
+            this.position = new Position(this.row - 1, this.column - 1);
+            this.str = "";
+            if (isWs(this.ch)) {
+                return this.whitespace();
+            } else if (this.ch == "\"") {
+                return this.string();
+            } else if (this.ch == "/" && this.file.peek() == "/") {
+                return this.lineComment();
+            } else if (this.ch == "/" && this.file.peek() == "*") {
+                return this.blockComment();
+            } else if (isAl(this.ch) || this.ch == "_") {
+                return this.idOrKeyword();
+            } else if (isNum(this.ch)) {
+                return this.number();
+            } else {
+                var two = this.ch + this.file.peek();
+                if (this.twoChars.has(two)) {
+                    var tok = new Token(this.file, this.twoChars[two], two, this.position);
+                    this.get();
+                    this.ch = this.get();
+                    return tok;
+                } else if (this.singleChars.has(this.ch)) {
+                    var tok = new Token(this.file, this.singleChars[this.ch], this.ch, this.position);
+                    this.ch = this.get();
+                    return tok;
+                } else {
+                    var tok = new Token(this.file, TokenType.Invalid, this.ch, this.position);
+                    this.ch = this.get();
+                    return tok;
+                }
+            }
+        }
+
+        function string(): Token {
+            this.str += "\"";
+            this.ch = this.get();
+            var escaped = false;
+            while (!(this.ch == "\"" && !escaped) && !this.file.isEof()) {
+                this.str += this.ch;
+                escaped = this.ch == "\\" && !escaped;
+                this.ch = this.get();
+            }
+            this.str += "\"";
+            this.ch = this.get();
+            return new Token(this.file, TokenType.StringLiteral, this.str, this.position);
+        }
+
+        function lineComment(): Token {
+            this.ch = this.get(); // "/"
+            this.ch = this.get(); // first char of comment
+            this.str = "//";
+            while (!(this.ch == "\r" || this.ch == "\n") && !this.file.isEof()) {
+                this.str += this.ch;
+                this.ch = this.get();
+            }
+            return new Token(this.file, TokenType.Comment, this.str, this.position);
+        }
+
+        function blockComment(): Token {
+            this.ch = this.get(); // "*"
+            this.ch = this.get(); // first char of comment
+            this.str = "/*";
+            while (!(this.ch == "*" && this.file.peek() == "/") && !this.file.isEof()) {
+                this.str += this.ch;
+                this.ch = this.get();
+            }
+            this.get();
+            this.ch = this.get();
+            this.str += "*/";
+            return new Token(this.file, TokenType.Comment, this.str, this.position);
+        }
+
+        function number(): Token {
+            this.str += this.ch;
+            this.ch = this.get();
+            while (isNum(this.ch)) {
+                this.str += this.ch;
+                this.ch = this.get();
+            }
+
+            if (this.ch == ".") {
+                this.str += ".";
+                this.ch = this.get();
+                while (isNum(this.ch)) {
+                    this.str += this.ch;
+                    this.ch = this.get();
+                }
+                return new Token(this.file, TokenType.FloatLiteral, this.str, this.position);
+            }
+            return new Token(this.file, TokenType.IntLiteral, this.str, this.position);
+        }
+
+        function whitespace(): Token {
+            while (isWs(this.ch)) {
+                this.str += this.ch;
+                this.ch = this.get();
+            }
+            return new Token(this.file, TokenType.Whitespace, this.str, this.position);
+        }
+
+        function idOrKeyword(): Token {
+            this.str += this.ch;
+            this.ch = this.get();
+            while ((isAlNum(this.ch) || this.ch == "_")) {
+                this.str += this.ch;
+                this.ch = this.get();
+            }
+
+            if (this.keywords.has(this.str)) {
+                return new Token(this.file, this.keywords[this.str], this.str, this.position);
+            } else {
+                return new Token(this.file, TokenType.Identifier, this.str, this.position);
+            }
+        }
+    }
+}

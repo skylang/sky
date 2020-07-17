@@ -1,0 +1,22 @@
+// Copyright (c) 2018 Stephan Unverwerth
+// This code is licensed under MIT license (See LICENSE for details)
+
+module Std.Lang.Compiler {
+    import sky.io.*;
+    import sky.io.file.*;
+    import sky.lang.compiler.parser.*;
+    import sky.lang.compiler.lexer.*;
+    import sky.lang.compiler.ast.*;
+
+    function main(args: String[]): int {
+        if (args.length < 2) {
+            println("Usage: sky input [output]");
+            return 1;
+        }
+        var inFile = new File(args[0], "rb");
+        var lexer = new Lexer(inFile);
+        var parser = new Parser(lexer, null);
+        var mod = parser.parseModule();
+        return 0;
+    }
+}
