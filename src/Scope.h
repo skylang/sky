@@ -15,8 +15,8 @@ namespace Sky {
         
     public:
         Node* node;
-		// for overloaded functions
-		Symbol* next = nullptr;
+        // for overloaded functions
+        Symbol* next = nullptr;
     };
 
     class Scope {

@@ -16,7 +16,7 @@
 namespace Sky {
 
     size_t align(size_t offset, size_t alignment) {
-		if ((offset % alignment) == 0) return offset;
+        if ((offset % alignment) == 0) return offset;
         return offset + alignment - (offset % alignment);
     }
 
@@ -245,7 +245,7 @@ namespace Sky {
                 chunk.addOp(Opcode::ReturnVoid);
             }*/
         } else if (!n.returns) {
-			if (n.source) chunk.setLine(n.source, n.lineend);
+            if (n.source) chunk.setLine(n.source, n.lineend);
             chunk.addOp(Opcode::ReturnVoid);
         }
 
@@ -364,15 +364,15 @@ namespace Sky {
             }
             else {
                 if (n.callTarget->node && n.callTarget->node->as<FunctionDeclaration>()) {
-					auto fun = n.callTarget->node->as<FunctionDeclaration>();
+                    auto fun = n.callTarget->node->as<FunctionDeclaration>();
                     visitChildren(n.arguments);
-					if (fun->builtin) {
-						chunk.addOp<uint64_t>(Opcode::BuiltinCall, (uint64_t)fun->builtin);
-					}
-					else {
-						auto ind = chunk.addOp<uint32_t, uint8_t>(Opcode::CallImm, 0xffffffff, n.callTarget->type->as<FunctionType>()->parameterTypes.size() + (n.callTarget->context ? 1 : 0));
-						addFixup(ind, n.callTarget->node->as<FunctionDeclaration>(), true);
-					}
+                    if (fun->builtin) {
+                        chunk.addOp<uint64_t>(Opcode::BuiltinCall, (uint64_t)fun->builtin);
+                    }
+                    else {
+                        auto ind = chunk.addOp<uint32_t, uint8_t>(Opcode::CallImm, 0xffffffff, n.callTarget->type->as<FunctionType>()->parameterTypes.size() + (n.callTarget->context ? 1 : 0));
+                        addFixup(ind, n.callTarget->node->as<FunctionDeclaration>(), true);
+                    }
                 }
                 else {
                     visitChild(n.callTarget);
@@ -615,21 +615,21 @@ namespace Sky {
     void ByteCodeCompiler::visit(BlockStatement& n) {
         if (n.source) chunk.setLine(n.source, n.line);
         visitChildren(n.statements);
-		if (n.source) chunk.setLine(n.source, n.lineend);
-	}
+        if (n.source) chunk.setLine(n.source, n.lineend);
+    }
 
     void ByteCodeCompiler::visit(BinopExpression& n) {
         if (n.source) chunk.setLine(n.source, n.line);
         if (n.function) {
             visitChild(n.left);
             visitChild(n.right);
-			if (n.function->builtin) {
-				chunk.addOp<uint64_t>(Opcode::BuiltinCall, (uint64_t)n.function->builtin);
-			}
-			else {
-				auto index = chunk.addOp<uint32_t, uint8_t>(Opcode::CallImm, 0xffffffff, 2);
-				addFixup(index, n.function, true);
-			}
+            if (n.function->builtin) {
+                chunk.addOp<uint64_t>(Opcode::BuiltinCall, (uint64_t)n.function->builtin);
+            }
+            else {
+                auto index = chunk.addOp<uint32_t, uint8_t>(Opcode::CallImm, 0xffffffff, 2);
+                addFixup(index, n.function, true);
+            }
             return;
         }
 

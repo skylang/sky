@@ -15,7 +15,7 @@ namespace Sky {
     class SubscriptExpression: public Expression {
     public:
         SKY_GET_TYPE(Sky::SubscriptExpression, Sky::Expression);
-        SKY_IMPL_EXPR_VISITOR;
+        SKY_IMPLEMENTATION_EXPRESSION_VISITOR;
 
     public:
         Expression* callTarget = nullptr;

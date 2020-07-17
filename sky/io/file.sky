@@ -38,8 +38,8 @@ module sky.io {
         }
 
         function getc(): String {
-			var ch = fgetc(this.handle);
-			if (ch < 0) {
+            var ch = fgetc(this.handle);
+            if (ch < 0) {
                 return "";
             }
             return new String([ch as u8]);
@@ -48,7 +48,7 @@ module sky.io {
         function peek(): String {
             var ch = fgetc(this.handle);
             ungetc(ch, this.handle);
-			if (ch < 0) {
+            if (ch < 0) {
                 return "";
             }
             return new String([ch as u8]);

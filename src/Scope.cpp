@@ -23,13 +23,13 @@ namespace Sky {
     void Scope::add(const std::string& name, Symbol* symbol) {
         auto it = symbols.find(name);
         if (it != symbols.end()) {
-			if (symbol->node->as<FunctionDeclaration>() && it->second->node->as<FunctionDeclaration>()) {
-				symbol->next = it->second;
-				it->second = symbol;
-			}
-			else {
-				throw DuplicateSymbolException("Duplicate symbol " + name);
-			}
+            if (symbol->node->as<FunctionDeclaration>() && it->second->node->as<FunctionDeclaration>()) {
+                symbol->next = it->second;
+                it->second = symbol;
+            }
+            else {
+                throw DuplicateSymbolException("Duplicate symbol " + name);
+            }
         }
         
         symbols.insert(std::make_pair(name, symbol));

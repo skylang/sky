@@ -9,7 +9,7 @@
 #include "InvalidType.h"
 #include <vector>
 
-#define SKY_IMPL_EXPR_VISITOR void accept(Sky::IExpressionVisitor& v) override { v.visit(*this); }
+#define SKY_IMPLEMENTATION_EXPRESSION_VISITOR void accept(Sky::IExpressionVisitor& v) override { v.visit(*this); }
 
 namespace Sky {
     class TypeDeclaration;

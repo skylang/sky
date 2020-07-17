@@ -42,8 +42,8 @@ namespace Sky {
 
     struct SourceLine {
         size_t address;
-		size_t file;
-		size_t line;
+        size_t file;
+        size_t line;
     };
 
     struct VarInfo {
@@ -68,7 +68,7 @@ namespace Sky {
         std::vector<const SourceFile*> files;
         std::vector<SourceLine> lines;
 
-		const SourceLine* getLine(size_t address) const;
+        const SourceLine* getLine(size_t address) const;
         void setLine(const SourceFile* file, size_t line);
         void addFunction(size_t address, const FunctionInfo& func);
         int addConstant(VMValue c);

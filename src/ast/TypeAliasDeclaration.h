@@ -13,8 +13,8 @@ namespace Sky {
     public:
         SKY_GET_TYPE(Sky::TypeAliasDeclaration, Sky::TypeDeclaration);
         
-		Node* getMember(const std::string& name) override;
-		std::vector<Node*> getMethods(const std::string& name) override;
+        Node* getMember(const std::string& name) override;
+        std::vector<Node*> getMethods(const std::string& name) override;
 
     public:
         Expression* typeExpression = nullptr;

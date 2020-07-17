@@ -10,7 +10,7 @@ namespace Sky {
     class NullableTypeExpression: public Expression {
     public:
         SKY_GET_TYPE(Sky::NullableTypeExpression, Sky::Expression);
-        SKY_IMPL_EXPR_VISITOR;
+        SKY_IMPLEMENTATION_EXPRESSION_VISITOR;
 
     public:
         Expression* baseTypeExpression = nullptr;

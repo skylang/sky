@@ -272,11 +272,11 @@ namespace Sky {
         return intt;
     }
 
-	std::vector<FunctionDeclaration*> TypeChecker::findOverload(const std::vector<FunctionDeclaration*>& funcs, const std::vector<Expression*>& args) {
+    std::vector<FunctionDeclaration*> TypeChecker::findOverload(const std::vector<FunctionDeclaration*>& funcs, const std::vector<Expression*>& args) {
         return findOverload(funcs, getTypes(args));
     }
 
-	std::vector<FunctionDeclaration*> TypeChecker::findOverload(const std::vector<FunctionDeclaration*>& candidates, const std::vector<TypeDeclaration*>& argTypes) {
+    std::vector<FunctionDeclaration*> TypeChecker::findOverload(const std::vector<FunctionDeclaration*>& candidates, const std::vector<TypeDeclaration*>& argTypes) {
         std::vector<FunctionDeclaration*> remaining;
         int numFound = 0;
         for (auto&& candidate: candidates) {
@@ -322,51 +322,51 @@ namespace Sky {
         auto t = getType(n.target);
         auto alias = t->as<TypeAliasDeclaration>();
         if (alias) {
-			t = alias->typeExpression->typeValue;
+            t = alias->typeExpression->typeValue;
         }
-		auto un = t->as<UnionType>();
-		auto iface = t->as<InterfaceDeclaration>();
-		if (un) {
-			auto checkedType = n.typeExpression->typeValue;
+        auto un = t->as<UnionType>();
+        auto iface = t->as<InterfaceDeclaration>();
+        if (un) {
+            auto checkedType = n.typeExpression->typeValue;
 
-			if (!un->containsType(checkedType)) {
-				error(n, "'" + checkedType->getFullName() + "' is not part of union type '" + t->getFullName() + "'.");
-				return;
-			}
+            if (!un->containsType(checkedType)) {
+                error(n, "'" + checkedType->getFullName() + "' is not part of union type '" + t->getFullName() + "'.");
+                return;
+            }
 
-			n.typeTag = un->getTypeTag(checkedType);
+            n.typeTag = un->getTypeTag(checkedType);
 
-			if (n.target->node && n.parent->as<IfStatement>()) {
-				refinements.back()[n.target->node].push_back(Refinement{ n.target->node, checkedType });
-			}
-		}
-		else if (iface) {
-			auto cls = n.typeExpression->typeValue->as<ClassDeclaration>();
-			if (!cls) {
-				error(n, "Checked expression must have class type");
-				return;
-			}
-			auto impl = getImplementation(cls, iface);
-			if (!impl) {
-				error(n, "This condition always evaluates to false because " + cls->getFullName() + " does not implement " + iface->getFullName());
+            if (n.target->node && n.parent->as<IfStatement>()) {
+                refinements.back()[n.target->node].push_back(Refinement{ n.target->node, checkedType });
+            }
+        }
+        else if (iface) {
+            auto cls = n.typeExpression->typeValue->as<ClassDeclaration>();
+            if (!cls) {
+                error(n, "Checked expression must have class type");
+                return;
+            }
+            auto impl = getImplementation(cls, iface);
+            if (!impl) {
+                error(n, "This condition always evaluates to false because " + cls->getFullName() + " does not implement " + iface->getFullName());
                 info("The following members are missing:");
                 printMissingMembers(cls, iface);
 
-				return;
-			}
-			n.implementation = impl;
+                return;
+            }
+            n.implementation = impl;
 
-			if (n.target->node && n.parent->as<IfStatement>()) {
-				refinements.back()[n.target->node].push_back(Refinement{ n.target->node, cls });
-			}
-		}
-		else {
+            if (n.target->node && n.parent->as<IfStatement>()) {
+                refinements.back()[n.target->node].push_back(Refinement{ n.target->node, cls });
+            }
+        }
+        else {
             error(n, t->getFullName() + " is neither a union type nor an interface.");
             return;
         }
 
-		n.type = &BoolType::instance;
-	}
+        n.type = &BoolType::instance;
+    }
 
     void TypeChecker::check(ClassDeclaration& n) {
         if (!n.genericParams.empty() && n.genericArguments.empty()) {

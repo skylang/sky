@@ -13,7 +13,7 @@ namespace Sky {
     class CastExpression: public Expression {
     public:
         SKY_GET_TYPE(Sky::CastExpression, Sky::Expression);
-        SKY_IMPL_EXPR_VISITOR;
+        SKY_IMPLEMENTATION_EXPRESSION_VISITOR;
 
     public:
         Expression* sourceExpression = nullptr;

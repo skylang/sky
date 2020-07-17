@@ -31,22 +31,22 @@ namespace Sky {
         void push(const VMValue& val);
         VMValue pop();
         void pop(size_t num);
-		VMValue peek(size_t idx);
-		void poke(size_t idx, const VMValue& val);
+        VMValue peek(size_t idx);
+        void poke(size_t idx, const VMValue& val);
 
         template<typename T> T read();
 
-		void checkRead(const VMValue& val, int64_t offset);
-		void checkWrite(const VMValue& val, int64_t offset);
+        void checkRead(const VMValue& val, int64_t offset);
+        void checkWrite(const VMValue& val, int64_t offset);
 
-		void writeSample();
+        void writeSample();
 
     public:
-		enum {
-			RUNNING,
-			STOPPED,
-			FINISHED,
-		} status;
+        enum {
+            RUNNING,
+            STOPPED,
+            FINISHED,
+        } status;
 
         bool halt = false;
         VMValue exitCode;

@@ -103,22 +103,22 @@ module sky.lang.compiler.lexer {
     }
 
     function isWs(ch: String): bool {
-		if (ch.length() < 1) return false;
+        if (ch.length() < 1) return false;
         return ch == " " || ch == "\t" || ch == "\r" || ch == "\n";
     }
 
     function isNum(ch: String): bool {
-		if (ch.length() < 1) return false;
+        if (ch.length() < 1) return false;
         return ch.data[0] > 47 && ch.data[0] < 58;
     }
 
     function isAl(ch: String): bool {
-		if (ch.length() < 1) return false;
+        if (ch.length() < 1) return false;
         return (ch.data[0] > 64 && ch.data[0] < 91) || (ch.data[0] > 96 && ch.data[0] < 123);
     }
 
     function isAlNum(ch: String): bool {
-		if (ch.length() < 1) return false;
+        if (ch.length() < 1) return false;
         return isAl(ch) || isNum(ch);
     }
 
@@ -199,8 +199,8 @@ module sky.lang.compiler.lexer {
             this.keywords.set("return", TokenType.Return);
             this.keywords.set("new", TokenType.New);
             this.keywords.set("this", TokenType.This);
-			this.keywords.set("is", TokenType.Is);
-			this.keywords.set("as", TokenType.As);
+            this.keywords.set("is", TokenType.Is);
+            this.keywords.set("as", TokenType.As);
             this.keywords.set("type", TokenType.Type);
         }
 

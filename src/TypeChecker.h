@@ -120,9 +120,9 @@ namespace Sky {
         TypeDeclaration* getType(Parameter* param);
 
     private:
-		std::vector<FunctionDeclaration*> findOverload(Expression* target, const std::vector<TypeDeclaration*>& argtypes);
-		std::vector<FunctionDeclaration*> findOverload(const std::vector<FunctionDeclaration*>& funcs, const std::vector<Expression*>& args);
-		std::vector<FunctionDeclaration*> findOverload(const std::vector<FunctionDeclaration*>& funcs, const std::vector<TypeDeclaration*>& argTypes);
+        std::vector<FunctionDeclaration*> findOverload(Expression* target, const std::vector<TypeDeclaration*>& argtypes);
+        std::vector<FunctionDeclaration*> findOverload(const std::vector<FunctionDeclaration*>& funcs, const std::vector<Expression*>& args);
+        std::vector<FunctionDeclaration*> findOverload(const std::vector<FunctionDeclaration*>& funcs, const std::vector<TypeDeclaration*>& argTypes);
 
         void printMissingMembers(ClassDeclaration* cls, InterfaceDeclaration* iface);
 

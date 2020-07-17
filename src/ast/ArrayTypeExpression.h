@@ -11,7 +11,7 @@ namespace Sky {
     class ArrayTypeExpression: public Expression {
     public:
         SKY_GET_TYPE(Sky::ArrayTypeExpression, Sky::Expression);
-        SKY_IMPL_EXPR_VISITOR;
+        SKY_IMPLEMENTATION_EXPRESSION_VISITOR;
 
     public:
         Expression* baseTypeExpression = nullptr;

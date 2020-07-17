@@ -34,7 +34,7 @@ module sky.lang.compiler.parser {
         var lexer: Lexer;
         var token: Token;
         var report: ErrorReporter;
-		var trivia: String;
+        var trivia: String;
         
         function init(l: Lexer, report: ErrorReporter?) {
             if (report is ErrorReporter) {
@@ -43,22 +43,22 @@ module sky.lang.compiler.parser {
                 this.report = new DefaultErrorReporter;
             }
             this.lexer = l;
-			this.eat();
+            this.eat();
         }
 
         function parseModule(): ModuleDecl {
-			var trivia = this.trivia;
-			var start = this.getPosition();
+            var trivia = this.trivia;
+            var start = this.getPosition();
             this.eat(TokenType.Module);
             var name = this.parseIdentifierList(TokenType.Period);
             this.eat(TokenType.CurlyOpen);
 
-			var imports = new List<ImportDirective>;
-			var exports = new List<ExportDirective>;
-			var classes = new List<ClassDecl>;
-			var interfaces = new List<InterfaceDecl>;
-			var enums = new List<EnumDecl>;
-			var functions = new List<FunctionDecl>;
+            var imports = new List<ImportDirective>;
+            var exports = new List<ExportDirective>;
+            var classes = new List<ClassDecl>;
+            var interfaces = new List<InterfaceDecl>;
+            var enums = new List<EnumDecl>;
+            var functions = new List<FunctionDecl>;
             var types = new List<TypeAliasDecl>;
 
             while (this.lexer.hasNext() && !this.match(TokenType.CurlyClose)) {
@@ -85,76 +85,76 @@ module sky.lang.compiler.parser {
                 }
             }
 
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.CurlyClose);
 
             return new ModuleDecl(
-				trivia,
-				start,
-				end,
-				name,
-				imports,
-				exports,
-				classes,
-				interfaces,
-				enums,
-				functions,
+                trivia,
+                start,
+                end,
+                name,
+                imports,
+                exports,
+                classes,
+                interfaces,
+                enums,
+                functions,
                 types
-			);
+            );
         }
 
         function parseTypeAliasDecl(isExported: bool): TypeAliasDecl {
             var trivia = this.trivia;
-			var start = this.getPosition();
-			this.eat(TokenType.Type);
+            var start = this.getPosition();
+            this.eat(TokenType.Type);
             var name = this.parseIdentifier();
             this.eat(TokenType.Equals);
             var _type = this.parseTypeExpression();
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.Semicolon);
-			return new TypeAliasDecl(trivia, start, end, name, _type);
-		}       
+            return new TypeAliasDecl(trivia, start, end, name, _type);
+        }       
 
-		function parseArrayLiteral(): ArrayLiteralExpression {
-			var start = this.getPosition();
-			this.eat(TokenType.BracketOpen);
-			var elements = this.parseExpressionList(TokenType.Comma);
-			var end = this.getPosition();
-			this.eat(TokenType.BracketClose);
-			return new ArrayLiteralExpression(start, end, elements);
-		}
+        function parseArrayLiteral(): ArrayLiteralExpression {
+            var start = this.getPosition();
+            this.eat(TokenType.BracketOpen);
+            var elements = this.parseExpressionList(TokenType.Comma);
+            var end = this.getPosition();
+            this.eat(TokenType.BracketClose);
+            return new ArrayLiteralExpression(start, end, elements);
+        }
 
-		function parseObjectLiteral(): ObjectLiteralExpression {
-			var start = this.getPosition();
-			this.eat(TokenType.CurlyOpen);
-			var keys = new List<Expression>;
-			var values = new List<Expression>;
-			while (this.lexer.hasNext() && !this.match(TokenType.CurlyClose)) {
-				keys.append(this.parseExpression());
-				this.eat(TokenType.Colon);
-				values.append(this.parseExpression());
-				this.eatOptional(TokenType.Comma);
-			}
-			var end = this.getPosition();
-			this.eat(TokenType.CurlyClose);
-			return new ObjectLiteralExpression(start, end, keys, values);
-		}
+        function parseObjectLiteral(): ObjectLiteralExpression {
+            var start = this.getPosition();
+            this.eat(TokenType.CurlyOpen);
+            var keys = new List<Expression>;
+            var values = new List<Expression>;
+            while (this.lexer.hasNext() && !this.match(TokenType.CurlyClose)) {
+                keys.append(this.parseExpression());
+                this.eat(TokenType.Colon);
+                values.append(this.parseExpression());
+                this.eatOptional(TokenType.Comma);
+            }
+            var end = this.getPosition();
+            this.eat(TokenType.CurlyClose);
+            return new ObjectLiteralExpression(start, end, keys, values);
+        }
 
         function parseImport(): ImportDirective {
-			var start = this.getPosition();
+            var start = this.getPosition();
             this.eat();
             var imports = this.parseWildcardIdentifierList(TokenType.Comma);
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.Semicolon);
             return new ImportDirective(start, end, imports);
         }
 
         function parseWildcardIdentifier(): WildcardIdentifier {
-			var start = this.getPosition();
+            var start = this.getPosition();
             var parts = this.parseIdentifierList(TokenType.Period);
-			var end = this.getPosition();
+            var end = this.getPosition();
             if (this.match(TokenType.Asterisk)) {
-				end = this.getPosition();
+                end = this.getPosition();
                 this.eat();
                 return new WildcardIdentifier(start, end, parts, true);
             } else {
@@ -163,8 +163,8 @@ module sky.lang.compiler.parser {
         }
 
         function parseIdentifier(): Identifier {
-			var start = this.getPosition();
-			var end = this.getPosition();
+            var start = this.getPosition();
+            var end = this.getPosition();
             return new Identifier(start, end, this.eat(TokenType.Identifier));
         }
 
@@ -236,25 +236,25 @@ module sky.lang.compiler.parser {
             return exprs;
         }
         function parseExport(): ExportDirective {
-			var start = this.getPosition();
+            var start = this.getPosition();
             this.eat(TokenType.Export);
             var ids = this.parseIdentifierList(TokenType.Comma);
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.Semicolon);
             return new ExportDirective(start, end, ids);
         }
 
         function parseClass(): ClassDecl {
-			var start = this.getPosition();
-			var trivia = this.trivia;
+            var start = this.getPosition();
+            var trivia = this.trivia;
             this.eat(TokenType.Class);
             var name = this.parseIdentifier();
 
-			var genericParams: List<Identifier>? = null;
-			if (this.eatOptional(TokenType.LessThan)) {
-				genericParams = this.parseIdentifierList(TokenType.Comma);
-				this.eat(TokenType.GreaterThan);
-			}
+            var genericParams: List<Identifier>? = null;
+            if (this.eatOptional(TokenType.LessThan)) {
+                genericParams = this.parseIdentifierList(TokenType.Comma);
+                this.eat(TokenType.GreaterThan);
+            }
 
             this.eat(TokenType.CurlyOpen);
             var methods = new List<ClassMethodDecl>;
@@ -268,33 +268,33 @@ module sky.lang.compiler.parser {
                     this.skip();
                 }
             }
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.CurlyClose);
 
             return new ClassDecl(trivia, start, end, name, genericParams, methods, fields);
         }
 
         function parseInterface(): InterfaceDecl {
-			var trivia = this.trivia;
-			var start = this.getPosition();
+            var trivia = this.trivia;
+            var start = this.getPosition();
             this.eat(TokenType.Interface);
-			var name = this.parseIdentifier();
-			this.eat(TokenType.CurlyOpen);
-			var methods = new List<InterfaceMethod>;
-			var fields = new List<InterfaceField>;
-			while (this.lexer.hasNext() && !this.match(TokenType.CurlyClose)) {
-				if (this.match(TokenType.Function)) {
-					methods.append(this.parseInterfaceMethod());
-				} else if (this.match(TokenType.Var)) {
-					fields.append(this.parseInterfaceField());
-				}
-			}
-			var end = this.getPosition();
-			this.eat(TokenType.CurlyClose);
+            var name = this.parseIdentifier();
+            this.eat(TokenType.CurlyOpen);
+            var methods = new List<InterfaceMethod>;
+            var fields = new List<InterfaceField>;
+            while (this.lexer.hasNext() && !this.match(TokenType.CurlyClose)) {
+                if (this.match(TokenType.Function)) {
+                    methods.append(this.parseInterfaceMethod());
+                } else if (this.match(TokenType.Var)) {
+                    fields.append(this.parseInterfaceField());
+                }
+            }
+            var end = this.getPosition();
+            this.eat(TokenType.CurlyClose);
             return new InterfaceDecl(trivia, start, end, name, methods, fields);
         }
 
-		function parseInterfaceMethod(): InterfaceMethod {
+        function parseInterfaceMethod(): InterfaceMethod {
             var start = this.getPosition();
             this.eat(TokenType.Function);
             var name = this.parseIdentifier();
@@ -306,12 +306,12 @@ module sky.lang.compiler.parser {
                 returnType = this.parseTypeExpression();
             }
             var end = this.getPosition();
-			this.eat(TokenType.Semicolon);
-			return new InterfaceMethod(start, end, name, params, returnType);
-		}
+            this.eat(TokenType.Semicolon);
+            return new InterfaceMethod(start, end, name, params, returnType);
+        }
 
-		function parseInterfaceField(): InterfaceField {
-			var trivia = this.trivia;
+        function parseInterfaceField(): InterfaceField {
+            var trivia = this.trivia;
             var start = this.getPosition();
             this.eat(TokenType.Var);
             var name = this.parseIdentifier();
@@ -319,31 +319,31 @@ module sky.lang.compiler.parser {
             var _type = this.parseTypeExpression();
             var end = this.getPosition();
             this.eat(TokenType.Semicolon);
-			return new InterfaceField(trivia, start, end, name, _type);
-		}
+            return new InterfaceField(trivia, start, end, name, _type);
+        }
 
         function parseEnum(): EnumDecl {
-			var trivia = this.trivia;
-			var start = this.getPosition();
+            var trivia = this.trivia;
+            var start = this.getPosition();
             this.eat(TokenType.Enum);
             var name = this.parseIdentifier();
             this.eat(TokenType.CurlyOpen);
             var elements = this.parseEnumElementList(TokenType.Comma);
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.CurlyClose);
             return new EnumDecl(trivia, start, end, name, elements);
         }
 
-		function parseEnumElement(): EnumElement {
-			var start = this.getPosition();
-			var end = this.getPosition();
-			var name = this.parseIdentifier();
-			return new EnumElement(start, end, name);
-		}
+        function parseEnumElement(): EnumElement {
+            var start = this.getPosition();
+            var end = this.getPosition();
+            var name = this.parseIdentifier();
+            return new EnumElement(start, end, name);
+        }
 
         function parseFunction(isExported: bool, isExternal: bool): FunctionDecl {
             var start = this.getPosition();
-			var trivia = this.trivia;
+            var trivia = this.trivia;
             this.eat(TokenType.Function);
             var name: Identifier | Token;
             if (this.match(TokenType.BracketOpen)) {
@@ -373,83 +373,83 @@ module sky.lang.compiler.parser {
 
         function parseBlock(): Block {
             var start = this.getPosition();
-			this.eat(TokenType.CurlyOpen);
+            this.eat(TokenType.CurlyOpen);
             var stmts = new List<Statement>;
             while (this.matchStatement()) {
                 stmts.append(this.parseStatement());
             }
             var end = this.getPosition();
-			this.eat(TokenType.CurlyClose);
+            this.eat(TokenType.CurlyClose);
             return new Block(start, end, stmts);
         }
 
         function parseExpressionStatement(): ExpressionStatement {
             var start = this.getPosition();
-			var expr = this.parseExpression();
-			var end = this.getPosition();
+            var expr = this.parseExpression();
+            var end = this.getPosition();
             this.eat(TokenType.Semicolon);
             return new ExpressionStatement(start, end, expr);
         }
 
         function parseExpression(): Expression {
             var expr: Expression;
-			var start = this.getPosition();
+            var start = this.getPosition();
             if (this.match(TokenType.IntLiteral)) {
-				var end = this.getPosition();
+                var end = this.getPosition();
                 expr = new IntLiteralExpression(start, end, this.eat());
             } else if (this.match(TokenType.FloatLiteral)) {
-				var end = this.getPosition();
+                var end = this.getPosition();
                 expr = new FloatLiteralExpression(start, end, this.eat());
             } else if (this.match(TokenType.StringLiteral)) {
-				var end = this.getPosition();
+                var end = this.getPosition();
                 expr = new StringLiteralExpression(start, end, this.eat());
             } else if (this.match(TokenType.This)) {
-				var end = this.getPosition();
-				this.eat();
-				expr = new ThisExpression(start, end);
-			} else if (this.match(TokenType.New)) {
-				expr = this.parseNewExpression();
-			} else if (this.match(TokenType.Identifier)) {
+                var end = this.getPosition();
+                this.eat();
+                expr = new ThisExpression(start, end);
+            } else if (this.match(TokenType.New)) {
+                expr = this.parseNewExpression();
+            } else if (this.match(TokenType.Identifier)) {
                 var end = this.getPosition();
                 expr = new IdentifierExpression(start, end, this.eat());
             } else if (this.match(TokenType.ParenOpen)) {
                 this.eat();
                 expr = this.parseExpression();
-				expr.start = start;
-				expr.end = this.getPosition();
+                expr.start = start;
+                expr.end = this.getPosition();
                 this.eat(TokenType.ParenClose);
             } else if (this.match(TokenType.CurlyOpen)) {
                 expr = this.parseObjectLiteral();
             } else if (this.match(TokenType.BracketOpen)) {
                 expr = this.parseArrayLiteral();
             } else if (this.matchPrefix()) {
-				var op = this.eat();
-				var inner = this.parseExpression();
-				expr = new PrefixExpression(start, inner.end, inner, op);
-			} else {
-				var end = this.getPosition();
+                var op = this.eat();
+                var inner = this.parseExpression();
+                expr = new PrefixExpression(start, inner.end, inner, op);
+            } else {
+                var end = this.getPosition();
                 this.skip();
                 expr = new MissingExpression(start, end);
             }
 
             while (this.matchSecondaryExpression()) {
-				if (this.matchBinop()) {
-					expr = this.parseBinopExpression(expr);
-				} else if (this.matchPostfix()) {
-					expr = this.parsePostfixExpression(expr);
-				} else if (this.matchAssignment()) {
-					expr = this.parseAssignmentExpression(expr);
-				} else if (this.match(TokenType.ParenOpen)) {
+                if (this.matchBinop()) {
+                    expr = this.parseBinopExpression(expr);
+                } else if (this.matchPostfix()) {
+                    expr = this.parsePostfixExpression(expr);
+                } else if (this.matchAssignment()) {
+                    expr = this.parseAssignmentExpression(expr);
+                } else if (this.match(TokenType.ParenOpen)) {
                     expr = this.parseCallExpression(expr);
                 } else if (this.match(TokenType.Period)) {
                     expr = this.parseScopeExpression(expr);
                 } else if (this.match(TokenType.Is)) {
-					expr = this.parseIsExpression(expr);
-				} else if (this.match(TokenType.As)) {
-					expr = this.parseCastExpression(expr);
-				} else if (this.match(TokenType.BracketOpen)) {
-					expr = this.parseSubscriptExpression(expr);
-				} else {
+                    expr = this.parseIsExpression(expr);
+                } else if (this.match(TokenType.As)) {
+                    expr = this.parseCastExpression(expr);
+                } else if (this.match(TokenType.BracketOpen)) {
+                    expr = this.parseSubscriptExpression(expr);
+                } else {
                     this.expected("Secondary expression");
                     this.eat();
                 }
@@ -458,76 +458,76 @@ module sky.lang.compiler.parser {
             return expr;
         }
 
-		function parseSubscriptExpression(left: Expression): SubscriptExpression {
-			var start = this.getPosition();
-			this.eat(TokenType.BracketOpen);
-			var args = this.parseExpressionList(TokenType.Comma);
-			var end = this.getPosition();
-			this.eat(TokenType.BracketClose);
-			return new SubscriptExpression(start, end, left, args);
-		}
+        function parseSubscriptExpression(left: Expression): SubscriptExpression {
+            var start = this.getPosition();
+            this.eat(TokenType.BracketOpen);
+            var args = this.parseExpressionList(TokenType.Comma);
+            var end = this.getPosition();
+            this.eat(TokenType.BracketClose);
+            return new SubscriptExpression(start, end, left, args);
+        }
 
-		function parseIsExpression(left: Expression): IsExpression {
-			this.eat(TokenType.Is);
-			var _type = this.parseTypeExpression();
-			return new IsExpression(left.start, _type.end);
-		}
+        function parseIsExpression(left: Expression): IsExpression {
+            this.eat(TokenType.Is);
+            var _type = this.parseTypeExpression();
+            return new IsExpression(left.start, _type.end);
+        }
 
-		function parseCastExpression(left: Expression): CastExpression {
-			this.eat(TokenType.As);
-			var _type = this.parseTypeExpression();
-			return new CastExpression(left.start, _type.end);
-		}
+        function parseCastExpression(left: Expression): CastExpression {
+            this.eat(TokenType.As);
+            var _type = this.parseTypeExpression();
+            return new CastExpression(left.start, _type.end);
+        }
 
-		function parseNewExpression(): NewExpression {
-			var start = this.getPosition();
-			this.eat(TokenType.New);
-			var _type = this.parseTypeExpression();
-			var end = _type.end;
-			var args: List<Expression>? = null;
-			if (this.eatOptional(TokenType.ParenOpen)) {
-				args = this.parseExpressionList(TokenType.Comma);
-	            end = this.getPosition();
-				this.eat(TokenType.ParenClose);
-			}
-			return new NewExpression(start, end);
-		}
+        function parseNewExpression(): NewExpression {
+            var start = this.getPosition();
+            this.eat(TokenType.New);
+            var _type = this.parseTypeExpression();
+            var end = _type.end;
+            var args: List<Expression>? = null;
+            if (this.eatOptional(TokenType.ParenOpen)) {
+                args = this.parseExpressionList(TokenType.Comma);
+                end = this.getPosition();
+                this.eat(TokenType.ParenClose);
+            }
+            return new NewExpression(start, end);
+        }
 
-		function parseBinopExpression(left: Expression): BinopExpression {
-			var op = this.eat();
-			var right = this.parseExpression();
-			return new BinopExpression(left.start, right.end, left, right, op);
-		}
+        function parseBinopExpression(left: Expression): BinopExpression {
+            var op = this.eat();
+            var right = this.parseExpression();
+            return new BinopExpression(left.start, right.end, left, right, op);
+        }
 
-		function parsePostfixExpression(left: Expression): PostfixExpression {
-			var end = this.getPosition();
-			var op = this.eat();
-			return new PostfixExpression(left.start, end, left, op);
-		}
+        function parsePostfixExpression(left: Expression): PostfixExpression {
+            var end = this.getPosition();
+            var op = this.eat();
+            return new PostfixExpression(left.start, end, left, op);
+        }
 
-		function parseAssignmentExpression(assignee: Expression): AssignmentExpression {
-			var op = this.eat();
-			var right = this.parseExpression();
-			return new AssignmentExpression(assignee.start, right.end, assignee, right, op);
-		}
+        function parseAssignmentExpression(assignee: Expression): AssignmentExpression {
+            var op = this.eat();
+            var right = this.parseExpression();
+            return new AssignmentExpression(assignee.start, right.end, assignee, right, op);
+        }
 
-		function parseScopeExpression(target: Expression): ScopeExpression {
-			this.eat(TokenType.Period);
-			var end = this.getPosition();
-			var name = this.parseIdentifier();
-			return new ScopeExpression(target.start, end, target, name);
-		}
+        function parseScopeExpression(target: Expression): ScopeExpression {
+            this.eat(TokenType.Period);
+            var end = this.getPosition();
+            var name = this.parseIdentifier();
+            return new ScopeExpression(target.start, end, target, name);
+        }
 
         function parseCallExpression(target: Expression): CallExpression {
             this.eat(TokenType.ParenOpen);
             var args = this.parseExpressionList(TokenType.Comma);
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.ParenClose);
             return new CallExpression(target.start, end, target, args);
         }
 
         function parseTypeExpression(): TypeExpression {
-			var start = this.getPosition();
+            var start = this.getPosition();
             var expr: TypeExpression;
             if (this.match(TokenType.Identifier)) {
                 expr = new IdentifierTypeExpression(start, this.getPosition(), this.eat());
@@ -542,10 +542,10 @@ module sky.lang.compiler.parser {
                 } else if (this.match(TokenType.LessThan)) {
                     expr = this.parseGenericTypeExpression(expr);
                 } else if (this.match(TokenType.QuestionMark)) {
-					expr = this.parseNullableTypeExpression(expr);
-				} else if (this.match(TokenType.Pipe)) {
-					expr = this.parseUnionTypeExpression(expr);
-				} else {
+                    expr = this.parseNullableTypeExpression(expr);
+                } else if (this.match(TokenType.Pipe)) {
+                    expr = this.parseUnionTypeExpression(expr);
+                } else {
                     this.expected("Secondary type expression");
                     this.skip();
                 }
@@ -554,25 +554,25 @@ module sky.lang.compiler.parser {
             return expr;
         }
 
-		function parseNullableTypeExpression(base: TypeExpression): NullableTypeExpression {
-			var end = this.getPosition();
-			this.eat(TokenType.QuestionMark);
-			return new NullableTypeExpression(base.start, end, base);
-		}
+        function parseNullableTypeExpression(base: TypeExpression): NullableTypeExpression {
+            var end = this.getPosition();
+            this.eat(TokenType.QuestionMark);
+            return new NullableTypeExpression(base.start, end, base);
+        }
 
-		function parseUnionTypeExpression(base: TypeExpression): UnionTypeExpression {
-			this.eat(TokenType.Pipe);
+        function parseUnionTypeExpression(base: TypeExpression): UnionTypeExpression {
+            this.eat(TokenType.Pipe);
             var second = this.parseTypeExpression();
-			return new UnionTypeExpression(base.start, second.end, base, second);
-		}
+            return new UnionTypeExpression(base.start, second.end, base, second);
+        }
 
-		function parseGenericTypeExpression(base: TypeExpression): GenericTypeExpression {
-			this.eat(TokenType.LessThan);
-			var args = this.parseTypeExpressionList(TokenType.Comma);
-			var end = this.getPosition();
-			this.eat(TokenType.GreaterThan);
-			return new GenericTypeExpression(base.start, end, base, args);
-		}
+        function parseGenericTypeExpression(base: TypeExpression): GenericTypeExpression {
+            this.eat(TokenType.LessThan);
+            var args = this.parseTypeExpressionList(TokenType.Comma);
+            var end = this.getPosition();
+            this.eat(TokenType.GreaterThan);
+            return new GenericTypeExpression(base.start, end, base, args);
+        }
 
         function parseArrayTypeExpression(base: TypeExpression): ArrayTypeExpression {
             this.eat(TokenType.BracketOpen);
@@ -580,19 +580,19 @@ module sky.lang.compiler.parser {
             if (this.match(TokenType.IntLiteral)) {
                 length = this.eat().value.toInt();
             }
-			var end = this.getPosition();
+            var end = this.getPosition();
             this.eat(TokenType.BracketClose);
             return new ArrayTypeExpression(base.start, end, base, length);
         }
 
         function parseStatement(): Statement {
             if (this.match(TokenType.Semicolon)) {
-       			var start = this.getPosition();
-				this.eat();
+                   var start = this.getPosition();
+                this.eat();
                 return new EmptyStatement(start, start);
             } else if (this.match(TokenType.CurlyOpen)) {
-				return this.parseBlock();
-			} else if (this.match(TokenType.Return)) {
+                return this.parseBlock();
+            } else if (this.match(TokenType.Return)) {
                 return this.parseReturnStatement();
             } else if (this.match(TokenType.Var)) {
                 return this.parseVarDecl();
@@ -603,72 +603,72 @@ module sky.lang.compiler.parser {
             } else if (this.matchExpression()) {
                 return this.parseExpressionStatement();
             } else {
-				var start = this.getPosition();
+                var start = this.getPosition();
                 this.eat();
                 return new MissingStatement(start, start);
             }
         }
 
         function parseReturnStatement(): ReturnStatement {
-			var start = this.getPosition();
+            var start = this.getPosition();
             this.eat(TokenType.Return);
             var expr: Expression? = null;
             if (this.matchExpression()) {
                 var nnexpr = this.parseExpression();
                 expr = nnexpr;
             }
-			var end = this.getPosition();
-			this.eat(TokenType.Semicolon);
+            var end = this.getPosition();
+            this.eat(TokenType.Semicolon);
             return new ReturnStatement(start, end, expr);
         }
 
         function parseClassMethod(): ClassMethodDecl {
-			var start = this.getPosition();
-			var fun = this.parseFunction(false, false);
+            var start = this.getPosition();
+            var fun = this.parseFunction(false, false);
             return new ClassMethodDecl(start, fun.end, fun);
         }
 
         function parseClassField(): ClassFieldDecl {
-			var start = this.getPosition();
-			var varDecl = this.parseVarDecl();
+            var start = this.getPosition();
+            var varDecl = this.parseVarDecl();
             return new ClassFieldDecl(start, varDecl.end, varDecl);
         }
 
         function parseVarDecl(): VarDecl {
-			var trivia = this.trivia;
-			var start = this.getPosition();
+            var trivia = this.trivia;
+            var start = this.getPosition();
             this.eat(TokenType.Var);
             var name = this.parseIdentifier();
 
-			var _type: TypeExpression? = null;
-			if (this.eatOptional(TokenType.Colon)) {
-            	_type = this.parseTypeExpression();
-			}
+            var _type: TypeExpression? = null;
+            if (this.eatOptional(TokenType.Colon)) {
+                _type = this.parseTypeExpression();
+            }
 
-			var initializer: Expression? = null;
-			if (this.eatOptional(TokenType.Equals)) {
-				initializer = this.parseExpression();
-			}
+            var initializer: Expression? = null;
+            if (this.eatOptional(TokenType.Equals)) {
+                initializer = this.parseExpression();
+            }
 
-			var end = this.getPosition();
-			this.eat(TokenType.Semicolon);
+            var end = this.getPosition();
+            this.eat(TokenType.Semicolon);
 
             return new VarDecl(trivia, start, end, name, _type, initializer);
         }
 
         function parseIfStatement(): IfStatement {
             var start = this.getPosition();
-			this.eat(TokenType.If);
+            this.eat(TokenType.If);
             this.eat(TokenType.ParenOpen);
             var expr = this.parseExpression();
             this.eat(TokenType.ParenClose);
             var trueBranch = this.parseStatement();
-			var end = trueBranch.end;
+            var end = trueBranch.end;
             var falseBranch: Statement? = null;
             if (this.eatOptional(TokenType.Else)) {
                 var nnstmt = this.parseStatement();
                 falseBranch = nnstmt;
-				end = nnstmt.end;
+                end = nnstmt.end;
             }
 
             return new IfStatement(start, end, expr, trueBranch, falseBranch);
@@ -676,7 +676,7 @@ module sky.lang.compiler.parser {
 
         function parseWhileStatement(): WhileStatement {
             var start = this.getPosition();
-			this.eat(TokenType.While);
+            this.eat(TokenType.While);
             this.eat(TokenType.ParenOpen);
             var expr = this.parseExpression();
             this.eat(TokenType.ParenClose);
@@ -687,116 +687,116 @@ module sky.lang.compiler.parser {
 
         function parseParameter(): Parameter {
             var start = this.getPosition();
-			var name = this.parseIdentifier();
+            var name = this.parseIdentifier();
             this.eat(TokenType.Colon);
             var _type = this.parseTypeExpression();
             return new Parameter(start, _type.end, name, _type);
         }
 
-		function matchTypeExpression(): bool {
-			return this.match(TokenType.Identifier);
-		}
+        function matchTypeExpression(): bool {
+            return this.match(TokenType.Identifier);
+        }
 
         function matchStatement(): bool {
             return this.match([
                 TokenType.Semicolon,
                 TokenType.Return,
                 TokenType.Var,
-				TokenType.If,
-				TokenType.While
+                TokenType.If,
+                TokenType.While
             ]) || this.matchExpression();
         }
 
         function matchExpression(): bool {
             return this.match([
-				TokenType.New,
-				TokenType.This,
+                TokenType.New,
+                TokenType.This,
                 TokenType.Identifier,
                 TokenType.ParenOpen,
                 TokenType.StringLiteral,
                 TokenType.IntLiteral,
                 TokenType.FloatLiteral,
-				TokenType.BracketOpen,
-				TokenType.CurlyOpen
+                TokenType.BracketOpen,
+                TokenType.CurlyOpen
             ]) || this.matchPrefix();
         }
 
-		function matchBinop(): bool {
+        function matchBinop(): bool {
             return this.match([
                 TokenType.Plus,
                 TokenType.Minus,
                 TokenType.Asterisk,
                 TokenType.Slash,
                 TokenType.Percent,
-				TokenType.EqualsEquals,
-				TokenType.ExclEquals,
-				TokenType.LessThan,
-				TokenType.LessThanEquals,
-				TokenType.GreaterThan,
-				TokenType.GreaterThanEquals,
-				TokenType.Pipe,
-				TokenType.Amp,
-				TokenType.PipePipe,
-				TokenType.AmpAmp
+                TokenType.EqualsEquals,
+                TokenType.ExclEquals,
+                TokenType.LessThan,
+                TokenType.LessThanEquals,
+                TokenType.GreaterThan,
+                TokenType.GreaterThanEquals,
+                TokenType.Pipe,
+                TokenType.Amp,
+                TokenType.PipePipe,
+                TokenType.AmpAmp
             ]);
-		}
+        }
 
-		function matchPrefix(): bool {
-			return this.match([
-				TokenType.ExclamationMark,
-				TokenType.Minus,
-				TokenType.MinusMinus,
-				TokenType.PlusPlus
-			]);
-		}
+        function matchPrefix(): bool {
+            return this.match([
+                TokenType.ExclamationMark,
+                TokenType.Minus,
+                TokenType.MinusMinus,
+                TokenType.PlusPlus
+            ]);
+        }
 
-		function matchPostfix(): bool {
-			return this.match([
-				TokenType.PlusPlus,
-				TokenType.MinusMinus
-			]);
-		}
+        function matchPostfix(): bool {
+            return this.match([
+                TokenType.PlusPlus,
+                TokenType.MinusMinus
+            ]);
+        }
 
-		function matchAssignment(): bool {
+        function matchAssignment(): bool {
             return this.match([
                 TokenType.Equals,
                 TokenType.PlusEquals,
                 TokenType.MinusEquals,
                 TokenType.AsteriskEquals,
                 TokenType.SlashEquals,
-				TokenType.PercentEquals
+                TokenType.PercentEquals
             ]);
-		}
+        }
 
         function matchSecondaryExpression(): bool {
             return this.match([
                 TokenType.ParenOpen,
-				TokenType.Period,
-				TokenType.Is,
-				TokenType.As,
-				TokenType.BracketOpen
+                TokenType.Period,
+                TokenType.Is,
+                TokenType.As,
+                TokenType.BracketOpen
             ]) || this.matchBinop() || this.matchAssignment() || this.matchPostfix();
         }
 
         function matchSecondaryTypeExpression(): bool {
             return this.match([
                 TokenType.BracketOpen,
-				TokenType.LessThan,
-				TokenType.QuestionMark,
+                TokenType.LessThan,
+                TokenType.QuestionMark,
                 TokenType.Pipe
             ]);
         }
 
-		/**
-		 * Match exact token type
-		 */
+        /**
+         * Match exact token type
+         */
         function match(_type: TokenType): bool {
             return this.token._type == _type;
         }
 
-		/**
-		 * Match any of the token types
-		 */
+        /**
+         * Match any of the token types
+         */
         function match(types: TokenType[]): bool {
             var i: i32 = 0;
             while (i < types.length) {
@@ -808,24 +808,24 @@ module sky.lang.compiler.parser {
             return false;
         }
 
-		/**
-		 * Eat token
-		 */
+        /**
+         * Eat token
+         */
         function eat(): Token {
-			var oldtoken = this.token;
+            var oldtoken = this.token;
             this.token = this.lexer.next();
-			this.trivia = "";
+            this.trivia = "";
             while (this.match(TokenType.Comment) || this.match(TokenType.Whitespace)) {
-				this.trivia = this.trivia + this.token.value;
+                this.trivia = this.trivia + this.token.value;
                 this.token = this.lexer.next();
             }
             return oldtoken;
         }
 
-		/**
-		 * Eat token of specified type.
-		 * Returns a skipped token if types mismatch.
-		 */
+        /**
+         * Eat token of specified type.
+         * Returns a skipped token if types mismatch.
+         */
         function eat(_type: TokenType): Token {
             if (this.match(_type)) {
                 return this.eat();
@@ -834,10 +834,10 @@ module sky.lang.compiler.parser {
             }
         }
 
-		/**
-		 * Eats token if type matches.
-		 * Returns whether the token was consumed.
-		 */
+        /**
+         * Eats token if type matches.
+         * Returns whether the token was consumed.
+         */
         function eatOptional(_type: TokenType): bool {
             if (this.match(_type)) {
                 this.eat();

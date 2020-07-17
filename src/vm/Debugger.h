@@ -27,11 +27,11 @@ namespace Sky {
 
         int run();
         
-		void addBreakpoint(size_t address, bool once);
-		void addBreakpoint(const std::string& file, size_t line, bool once);
-		void removeBreakpoint(const std::string& file, size_t line);
-		void removeBreakpoints(const std::string& file);
-		void step();
+        void addBreakpoint(size_t address, bool once);
+        void addBreakpoint(const std::string& file, size_t line, bool once);
+        void removeBreakpoint(const std::string& file, size_t line);
+        void removeBreakpoints(const std::string& file);
+        void step();
 
     private:
         void write(const std::string& text);

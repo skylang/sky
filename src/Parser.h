@@ -72,7 +72,7 @@ namespace Sky {
 
         template <typename T> T* addPosition(T* node, const Token& tok) {
             node->line = tok.line;
-			node->lineend = (token - 1)->line;
+            node->lineend = (token - 1)->line;
             node->column = tok.column;
             node->source = &source;
             node->firstToken = tok.index;

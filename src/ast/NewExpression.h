@@ -14,7 +14,7 @@ namespace Sky {
     class NewExpression: public Expression {
     public:
         SKY_GET_TYPE(Sky::NewExpression, Sky::Expression);
-        SKY_IMPL_EXPR_VISITOR;
+        SKY_IMPLEMENTATION_EXPRESSION_VISITOR;
 
     public:
         Expression* typeExpression = nullptr;

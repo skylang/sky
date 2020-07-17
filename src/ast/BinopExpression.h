@@ -11,7 +11,7 @@ namespace Sky {
     class BinopExpression: public Expression {
     public:
         SKY_GET_TYPE(Sky::BinopExpression, Sky::Expression);
-        SKY_IMPL_EXPR_VISITOR;
+        SKY_IMPLEMENTATION_EXPRESSION_VISITOR;
 
     public:
         TokenType op;

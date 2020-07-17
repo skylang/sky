@@ -5,11 +5,11 @@
 #include "Expression.h"
 
 namespace Sky {
-	Node* TypeAliasDeclaration::getMember(const std::string& name) {
-		return typeExpression->typeValue->getMember(name);
-	}
+    Node* TypeAliasDeclaration::getMember(const std::string& name) {
+        return typeExpression->typeValue->getMember(name);
+    }
 
-	std::vector<Node*> TypeAliasDeclaration::getMethods(const std::string& name) {
-		return typeExpression->typeValue->getMethods(name);
-	}
+    std::vector<Node*> TypeAliasDeclaration::getMethods(const std::string& name) {
+        return typeExpression->typeValue->getMethods(name);
+    }
 }

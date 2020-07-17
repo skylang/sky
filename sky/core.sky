@@ -57,9 +57,9 @@ module core {
             return new String(this, other);
         }
 
-		function !=(other: String): bool {
-			return !(this == other);
-		}
+        function !=(other: String): bool {
+            return !(this == other);
+        }
 
         function ==(other: String): bool {
             var len = this.length();
@@ -136,7 +136,7 @@ module core {
 
         function trim(): String {
             var length = this.length();
-			if (length == 0) {
+            if (length == 0) {
                 return this;
             }
 
@@ -213,29 +213,29 @@ module core {
         }
     }
 
-	export function toString(val: int): String {
-		var str = new String(20);
-		var i: int = str.length() - 1;
-		var sign = val < 0;
-		if (sign) {
-			val = -val;
-		}
-		while (val > 9) {
-			str.data[i] = 48 + val % 10;
-			i = i - 1;
-			val = val / 10;
-		}
-		str.data[i] = 48 + val % 10;
-		i = i - 1;
+    export function toString(val: int): String {
+        var str = new String(20);
+        var i: int = str.length() - 1;
+        var sign = val < 0;
+        if (sign) {
+            val = -val;
+        }
+        while (val > 9) {
+            str.data[i] = 48 + val % 10;
+            i = i - 1;
+            val = val / 10;
+        }
+        str.data[i] = 48 + val % 10;
+        i = i - 1;
 
         if (sign) {
             return "-" + str.substr(i + 1, str.length() - i - 1);
         } else {
             return str.substr(i + 1, str.length() - i - 1);
         }
-	}
+    }
 
-	export function toString(val: float, decimals: int): String {
+    export function toString(val: float, decimals: int): String {
         var intPart = val as int;
         val = val - intPart;
         if (val < 0.0) {
@@ -243,14 +243,14 @@ module core {
         }
 
         if (val > 0.0) {
-			var f: int = 1;
-			while (decimals > 0) {
-				f = f * 10;
-				decimals--;
-			}
+            var f: int = 1;
+            while (decimals > 0) {
+                f = f * 10;
+                decimals--;
+            }
             return toString(intPart) + "." + toString((val * f) as int);
         } else {
             return toString(intPart);
         }
-	}
+    }
 }

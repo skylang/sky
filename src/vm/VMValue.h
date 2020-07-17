@@ -32,7 +32,7 @@ namespace Sky {
         VMValue operator/(const VMValue& other) const;
 
         VMValue operator!() const;
-		operator bool() const;
+        operator bool() const;
 
         bool equals(const VMValue& other) const;
         std::string dump() const;

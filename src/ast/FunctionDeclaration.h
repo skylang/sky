@@ -14,9 +14,9 @@ namespace Sky {
     class Expression;
     class FunctionType;
     class Statement;
-	class VM;
+    class VM;
 
-	typedef void(*BuiltinFunction)(VM&);
+    typedef void(*BuiltinFunction)(VM&);
 
     class FunctionDeclaration: public Node {
     public:
@@ -34,7 +34,7 @@ namespace Sky {
         int numVariables = 0;
         bool isPrototype = false;
         bool isExternal = false;
-		BuiltinFunction builtin = nullptr;
+        BuiltinFunction builtin = nullptr;
     };
 }
 

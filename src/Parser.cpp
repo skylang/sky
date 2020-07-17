@@ -489,7 +489,7 @@ namespace Sky {
                 expression = addPosition(cast, startToken);
             }
             else if (matchBinary()) {
-				auto op = eat();
+                auto op = eat();
                 if (
                     op.type == TokenType::Equals ||
                     op.type == TokenType::PlusEquals ||

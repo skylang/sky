@@ -20,10 +20,10 @@ namespace Sky {
     else return VMValue();
 
     VMValue::VMValue(): type(Type::null) { value.integer = 0; }
-	VMValue::VMValue(int64_t val) : type(Type::integer) { value.integer = val; }
-	VMValue::VMValue(double val) : type(Type::floating) { value.f64 = val; }
-	VMValue::VMValue(bool val) : type(Type::boolean) { value.boolean = val; }
-	VMValue::VMValue(void* val) : type(Type::object) { value.object = val; }
+    VMValue::VMValue(int64_t val) : type(Type::integer) { value.integer = val; }
+    VMValue::VMValue(double val) : type(Type::floating) { value.f64 = val; }
+    VMValue::VMValue(bool val) : type(Type::boolean) { value.boolean = val; }
+    VMValue::VMValue(void* val) : type(Type::object) { value.object = val; }
 
     VMValue VMValue::operator==(const VMValue& other) const {
         VMVALUE_OP_LOG(==);
@@ -78,24 +78,24 @@ namespace Sky {
         return VMValue(!bool(*this));
     }
 
-	VMValue::operator bool() const {
-		if (type == Type::integer) return value.integer != 0;
-		else if (type == Type::floating) return value.f64 != 0;
-		else if (type == Type::boolean) return value.boolean;
+    VMValue::operator bool() const {
+        if (type == Type::integer) return value.integer != 0;
+        else if (type == Type::floating) return value.f64 != 0;
+        else if (type == Type::boolean) return value.boolean;
         else if (type == Type::null) return false;
         else if (type == Type::object) return value.object != nullptr;
-		else return false;
-	}
+        else return false;
+    }
 
     bool VMValue::equals(const VMValue& other) const {
         if (type != other.type) return false;
 
-		if (type == Type::integer) return value.integer == other.value.integer;
-		else if (type == Type::floating) return value.f64 == other.value.f64;
-		else if (type == Type::boolean) return value.boolean == other.value.boolean;
+        if (type == Type::integer) return value.integer == other.value.integer;
+        else if (type == Type::floating) return value.f64 == other.value.f64;
+        else if (type == Type::boolean) return value.boolean == other.value.boolean;
         else if (type == Type::null) return true;
         else if (type == Type::object) return value.object == other.value.object;
-		else return false;
+        else return false;
     }
 
     std::string VMValue::dump() const {
@@ -140,7 +140,7 @@ namespace Sky {
             str.write("n", 1);
         }
 
-		return str;
+        return str;
     }
 
     std::istream& operator>>(std::istream& str, VMValue& v) {
@@ -185,8 +185,8 @@ namespace Sky {
         else if (t == 'n') {
             v.type = VMValue::Type::null;
         }
-		
-		return str;
+        
+        return str;
     }
 
 }

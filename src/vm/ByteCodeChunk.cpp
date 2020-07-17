@@ -165,15 +165,15 @@ namespace Sky {
         return str;
     }
 
-	const SourceLine* ByteCodeChunk::getLine(size_t address) const {
-		for (int i = 0; i < lines.size(); ++i) {
-			if (lines[i].address > address) {
-				if (i == 0) return nullptr;
-				return &lines[i - 1];
-			}
-		}
-		return nullptr;
-	}
+    const SourceLine* ByteCodeChunk::getLine(size_t address) const {
+        for (int i = 0; i < lines.size(); ++i) {
+            if (lines[i].address > address) {
+                if (i == 0) return nullptr;
+                return &lines[i - 1];
+            }
+        }
+        return nullptr;
+    }
 
     void ByteCodeChunk::setLine(const SourceFile* file, size_t line) {
         for (size_t i = 0; i < files.size(); ++i) {
